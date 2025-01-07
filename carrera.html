@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulación de Carrera</title>
+    <style>
+        pre {
+            background: #f4f4f4;
+            padding: 10px;
+            border-radius: 5px;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <h1>Simulación de Carrera</h1>
+    <button onclick="getCarreras()">Obtener Carreras</button>
+    <button onclick="crearCarrera()">Crear Carrera</button>
+    <button onclick="actualizarCarrera()">Actualizar Carrera</button>
+    <button onclick="eliminarCarrera()">Eliminar Carrera</button>
+    <div id="output">
+        <h2>Resultados:</h2>
+        <pre id="resultados"></pre>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:3000/carreras';
+
+        async function getCarreras() {
+            const response = await fetch(API_URL);
+            const data = await response.json();
+            document.getElementById('resultados').innerText = JSON.stringify(data, null, 2);
+        }
+
+        async function crearCarrera() {
+            const numCorredores = prompt('Número de corredores:');
+            const distancia = prompt('Distancia (km):');
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ numCorredores: parseInt(numCorredores), distancia: parseFloat(distancia) })
+            });
+            const data = await response.json();
+            mostrarResultados('Carrera creada', data);
+        }
+
+        async function actualizarCarrera() {
+            const id = prompt('ID de la carrera a actualizar:');
+            const numCorredores = prompt('Nuevo número de corredores (dejar vacío para no cambiar):');
+            const distancia = prompt('Nueva distancia (km) (dejar vacío para no cambiar):');
+            const response = await fetch(`${API_URL}/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    numCorredores: numCorredores ? parseInt(numCorredores) : undefined,
+                    distancia: distancia ? parseFloat(distancia) : undefined
+                })
+            });
+            const data = await response.json();
+            mostrarResultados('Carrera actualizada', data);
+        }
+
+        async function eliminarCarrera() {
+            const id = prompt('ID de la carrera a eliminar:');
+            const response = await fetch(`${API_URL}/${id}`, {
+                method: 'DELETE'
+            });
+            const data = await response.json();
+            mostrarResultados('Carrera eliminada', data);
+        }
+
+        function mostrarResultados(titulo, data) {
+            document.getElementById('resultados').innerText = `${titulo}:\n${JSON.stringify(data, null, 2)}`;
+        }
+    </script>
+</body>
+</html>
